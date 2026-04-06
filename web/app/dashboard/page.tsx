@@ -6,6 +6,7 @@ interface Tenant {
   id: string
   label: string | null
   status: string
+  phone_number: string | null
   webhook_url: string | null
   koyeb_app_url: string | null
   created_at: string
@@ -32,8 +33,13 @@ export default function DashboardPage() {
   useEffect(() => { load() }, [])
 
   const handleDelete = async (id: string) => {
-    if (!confirm('Tear down this tenant and delete all data?')) return
+    if (!confirm('Tear down this tenant? This will release the phone number and stop billing.')) return
     await fetch(`/api/tenants/${id}`, { method: 'DELETE' })
+    load()
+  }
+
+  const handleProvisionNumber = async (id: string) => {
+    await fetch(`/api/tenants/${id}/provision-number`, { method: 'POST' })
     load()
   }
 
@@ -52,10 +58,7 @@ export default function DashboardPage() {
     <div>
       <div className="flex items-center justify-between mb-6">
         <h1 className="text-2xl font-semibold">Tenants</h1>
-        <a
-          href="/"
-          className="rounded-lg bg-indigo-600 px-4 py-2 text-sm font-medium text-white hover:bg-indigo-700"
-        >
+        <a href="/" className="rounded-lg bg-indigo-600 px-4 py-2 text-sm font-medium text-white hover:bg-indigo-700">
           + New tenant
         </a>
       </div>
@@ -64,8 +67,9 @@ export default function DashboardPage() {
         {tenants.map(t => (
           <div key={t.id} className="rounded-xl border bg-white p-5 shadow-sm">
             <div className="flex items-start justify-between gap-4">
-              <div className="min-w-0">
-                <div className="flex items-center gap-2 mb-1">
+              <div className="min-w-0 flex-1">
+
+                <div className="flex items-center gap-2 mb-3">
                   <span className="font-medium">{t.label || 'Unnamed tenant'}</span>
                   <span className={`rounded-full px-2 py-0.5 text-xs font-medium ${
                     STATUS_COLORS[t.status] ?? 'bg-gray-100 text-gray-700'
@@ -73,19 +77,40 @@ export default function DashboardPage() {
                     {t.status}
                   </span>
                 </div>
-                <p className="text-xs text-gray-400 mb-2">ID: {t.id}</p>
-                {t.webhook_url ? (
+
+                <div className="grid grid-cols-2 gap-x-6 gap-y-2 text-sm">
+                  {t.phone_number ? (
+                    <div>
+                      <p className="text-xs text-gray-400 mb-0.5">Phone number</p>
+                      <p className="font-mono font-semibold text-gray-900">{t.phone_number}</p>
+                    </div>
+                  ) : (
+                    <div>
+                      <p className="text-xs text-gray-400 mb-1">Phone number</p>
+                      <button
+                        onClick={() => handleProvisionNumber(t.id)}
+                        className="text-xs text-indigo-600 hover:underline"
+                      >
+                        Provision number →
+                      </button>
+                    </div>
+                  )}
+
                   <div>
-                    <p className="text-xs text-gray-500 mb-0.5">Twilio webhook URL</p>
-                    <code className="text-xs bg-gray-100 rounded px-2 py-1 break-all">{t.webhook_url}</code>
+                    <p className="text-xs text-gray-400 mb-0.5">Webhook URL</p>
+                    {t.webhook_url
+                      ? <code className="text-xs text-gray-600 break-all">{t.webhook_url}</code>
+                      : <p className="text-xs text-gray-400">Pending…</p>
+                    }
                   </div>
-                ) : (
-                  <p className="text-xs text-gray-400">Webhook URL pending deployment…</p>
-                )}
+                </div>
+
+                <p className="text-xs text-gray-300 mt-3">ID: {t.id}</p>
               </div>
+
               <button
                 onClick={() => handleDelete(t.id)}
-                className="shrink-0 text-xs text-red-500 hover:text-red-700"
+                className="shrink-0 text-xs text-red-400 hover:text-red-600"
               >
                 Delete
               </button>
