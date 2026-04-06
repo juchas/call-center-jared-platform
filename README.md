@@ -1,8 +1,8 @@
 # Call Center Jared Platform
 
-Open-source multi-tenant SaaS wrapper around [CallCenterJared](https://github.com/YourJared/CallCenterJared).
+Open-source multi-tenant SaaS wrapper around [call-center-jared](https://github.com/juchas/call-center-jared).
 
-Each tenant provides their own OpenAI and ServiceNow credentials. The platform provisions a dedicated [Koyeb](https://koyeb.com) service per tenant and returns a unique Twilio webhook URL.
+Each tenant provides their own OpenAI, ServiceNow, and Twilio credentials. The platform provisions a dedicated [Koyeb](https://koyeb.com) service per tenant, buys a phone number, and wires everything up automatically.
 
 ## Architecture
 
@@ -58,21 +58,25 @@ curl -X POST http://localhost:8000/api/tenants \
     "openai_key": "sk-...",
     "sn_instance": "myinstance",
     "sn_user": "admin",
-    "sn_pass": "secret"
+    "sn_pass": "secret",
+    "twilio_sid": "ACxxx",
+    "twilio_token": "your_token",
+    "phone_country": "PL"
   }'
 ```
 
-The response includes `webhook_url` — point your Twilio number's voice webhook to this URL.
+The response includes `phone_number` — that's the number callers dial, already fully configured.
 
 ## API reference
 
 | Method | Path | Description |
 |--------|------|-------------|
-| `POST` | `/api/tenants` | Create tenant + deploy Koyeb service |
+| `POST` | `/api/tenants` | Create tenant, deploy Koyeb service, buy phone number |
 | `GET` | `/api/tenants` | List all tenants |
 | `GET` | `/api/tenants/:id` | Get tenant status |
 | `PUT` | `/api/tenants/:id` | Update credentials (re-deploys) |
-| `DELETE` | `/api/tenants/:id` | Tear down service + delete tenant |
+| `DELETE` | `/api/tenants/:id` | Release number, tear down service, delete tenant |
+| `POST` | `/api/tenants/:id/provision-number` | Manually retry Twilio number provisioning |
 
 ## Contributing
 
@@ -80,4 +84,4 @@ PRs welcome. Please open an issue first for significant changes.
 
 ## License
 
-MIT
+AGPL v3 — © 2025 Piotr Juchnowicz. If you run a modified version as a service, you must publish your source code under the same license.
