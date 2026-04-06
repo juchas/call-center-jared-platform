@@ -8,8 +8,8 @@ class Settings(BaseSettings):
     encryption_key: str
     api_secret_key: str = ""
 
-    # Docker image deployed per tenant — override to use a custom registry
-    tenant_image: str = "docker.io/youjared/callcenterjared:latest"
+    # Docker image deployed per tenant — override via TENANT_IMAGE env var to use a fork or private registry
+    tenant_image: str = "ghcr.io/juchas/call-center-jared:latest"
     tenant_region: str = "fra"
     tenant_instance_type: str = "nano"
 
