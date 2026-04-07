@@ -84,4 +84,4 @@ PRs welcome. Please open an issue first for significant changes.
 
 ## License
 
-AGPL v3 — © 2025 Piotr Juchnowicz. If you run a modified version as a service, you must publish your source code under the same license.
+MIT — © 2025 Piotr Juchnowicz
